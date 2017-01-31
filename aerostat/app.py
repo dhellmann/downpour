@@ -20,7 +20,10 @@ import os.path
 import pprint
 import sys
 
+from cliff import app
+from cliff import commandmanager
 import os_client_config
+import pbr.version
 import progressbar
 import shade
 import yaml
@@ -28,6 +31,39 @@ import yaml
 from aerostat import download
 from aerostat import resolver
 from aerostat import resources
+
+version_info = pbr.version.VersionInfo('aerostat')
+
+
+class Aerostat(app.App):
+
+    def __init__(self):
+        super(Aerostat, self).__init__(
+            description='OpenStack Tenant Data Migration Tool',
+            version=version_info.version_string,
+            command_manager=CommandManager('aerostat'),
+        )
+
+    def initialize_app(self, argv):
+        self.LOG.debug('initialize_app')
+
+    def prepare_to_run_command(self, cmd):
+        self.LOG.debug('prepare_to_run_command %s', cmd.__class__.__name__)
+
+    def clean_up(self, cmd, result, err):
+        self.LOG.debug('clean_up %s', cmd.__class__.__name__)
+        if err:
+            self.LOG.debug('got an error: %s', err)
+
+
+def main(argv=sys.argv[1:]):
+    myapp = Aerostat()
+    return myapp.run(argv)
+
+
+if __name__ == '__main__':
+    sys.exit(main(sys.argv[1:]))
+
 
 
 def main():
